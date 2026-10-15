@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#131824">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ピーチ対策">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>ピーチ キャラ対策・試合プレーヤー</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0d1018; --panel:#161b27; --panel2:#1d2432; --line:#30394a; --text:#f0f3f9; --muted:#a4b1c5; --accent:#ff9dcc; --accent2:#3f2639; --green:#90dfbf; --danger:#ef969b; }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Yu Gothic UI","Meiryo",sans-serif;font-size:14px;line-height:1.55}
+    header{padding:18px 26px;border-bottom:1px solid var(--line);background:#131824;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+    h1{font-size:20px;margin:0;font-weight:800;letter-spacing:.01em} h2{font-size:16px;margin:0 0 13px} h3{font-size:14px;margin:0 0 8px}
+    small,.hint{color:var(--muted)} .top-note{font-size:12px;color:var(--muted)} .shell{max-width:1560px;margin:auto;padding:18px;display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start}
+    .panel{border:1px solid var(--line);background:var(--panel);border-radius:13px;padding:17px;min-width:0} .stack{display:grid;gap:12px} .field{display:grid;gap:5px} .twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    label{font-weight:650;font-size:12px;color:#d4deec} input,select,textarea{width:100%;padding:10px 11px;border:1px solid #485367;border-radius:8px;background:#101522;color:var(--text);font:inherit;outline:none;min-height:40px}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,157,204,.12)} textarea{resize:vertical;min-height:70px} input::placeholder,textarea::placeholder{color:#8793a5}
+    button,.filebutton{cursor:pointer;border-radius:8px;border:1px solid #465368;background:#263145;color:var(--text);font:inherit;font-weight:650;padding:9px 12px;min-height:39px;display:inline-flex;justify-content:center;align-items:center;gap:5px;text-decoration:none}
+    button:hover,.filebutton:hover{filter:brightness(1.15)} button:disabled{opacity:.48;cursor:not-allowed} .primary{background:#d977aa;color:#17101b;border-color:#f1a8cc} .danger{color:#ffb1b8;border-color:#764955} .ghost{background:transparent} .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center} .fill{flex:1} .muted{color:var(--muted)}
+    .form-actions{margin-top:1px} .help{font-size:11px;color:var(--muted);line-height:1.5} .divider{border:0;border-top:1px solid var(--line);margin:6px 0}
+    .right{display:grid;gap:16px;min-width:0} .video-frame{position:relative;background:#040506;aspect-ratio:16/9;border-radius:10px;overflow:hidden} #yt-player{position:absolute;inset:0;width:100%;height:100%} .video-frame iframe{width:100%!important;height:100%!important}
+    .placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;background:#07090e;color:#b6c2d3;pointer-events:none;z-index:1} .placeholder.hide{display:none}
+    .playing-title{font-weight:750;font-size:17px;margin:10px 0 2px;overflow-wrap:anywhere} .now-caption{color:var(--muted);font-size:12px;min-height:20px}
+    .meter{height:5px;border-radius:5px;overflow:hidden;background:#323b4c;margin:10px 0 7px} .meter>div{height:100%;width:0%;background:var(--accent);transition:width .15s}
+    .list-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px} .list-head h2{margin:0}.filters{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:9px;margin-bottom:13px}
+    .clip-list{display:grid;gap:8px;max-height:65vh;overflow:auto;padding-right:3px} .clip{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;justify-content:space-between;gap:10px;align-items:start}
+    .clip.active{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}.clip-title{font-weight:750;overflow-wrap:anywhere}.clip-sub{font-size:12px;color:var(--muted);margin:4px 0;overflow-wrap:anywhere}.clip-note{font-size:12px;color:#d6dce6;white-space:pre-wrap;overflow-wrap:anywhere}.clip-controls{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end;max-width:280px}
+    .clip-controls button,.clip-controls a{font-size:12px;padding:6px 9px;min-height:30px} .clip-controls a{color:#b2d6fc;text-decoration:none;border:1px solid #3d4e65;border-radius:7px;display:inline-flex;align-items:center} .pill{display:inline-block;border-radius:6px;background:#3d2940;color:#ffc0df;padding:1px 7px;margin-right:5px}
+    .empty{border:1px dashed var(--line);border-radius:9px;text-align:center;padding:26px 12px;color:var(--muted)} .status{font-size:12px;color:var(--green);min-height:17px} .status.err{color:var(--danger)} .inline-checkbox{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}.inline-checkbox input{width:auto;min-height:0;accent-color:var(--accent)}
+    .scroll-anchor{scroll-margin-top:15px} .note-box{font-size:12px;line-height:1.6;color:var(--muted);padding:9px 11px;background:#101622;border-radius:8px;border:1px solid var(--line)}
+    @supports(padding:max(0px)){body{padding-bottom:env(safe-area-inset-bottom)}}
+    @media(max-width:1000px){.shell{grid-template-columns:1fr}.right{grid-row:1}} @media(max-width:650px){header{padding:14px}.shell{padding:10px;gap:10px}.panel{padding:12px}.filters{grid-template-columns:1fr 1fr}.filters .search{grid-column:1/-1}.clip{display:grid}.clip-controls{max-width:none;justify-content:flex-start}h1{font-size:17px}}
+  </style>
+</head>
+<body>
+<header>
+  <div><h1>🍑 ピーチ キャラ対策・試合プレーヤー</h1><div class="top-note">配信動画の「指定区間」だけをキャラ別に連続再生 | 動画の保存・再アップロード不要</div></div>
+  <div class="top-note">PCをスリープにしてもiPhoneで利用可能｜登録データは各端末に保存</div>
+</header>
+<div class="shell">
+  <aside class="panel stack" id="form-panel">
+    <h2 id="form-heading">① 試合を登録</h2>
+    <form id="clip-form" class="stack" novalidate>
+      <div class="field"><label for="video-url">YouTube配信URL *</label><input id="video-url" type="text" placeholder="https://www.youtube.com/live/..." required><div class="help">通常動画・ライブのアーカイブ・短縮URLに対応。動画をダウンロードしません。</div></div>
+      <div class="twocol"><div class="field"><label for="start-time">開始時間 *</label><input id="start-time" placeholder="1:20:30" required></div><div class="field"><label for="end-time">終了時間 *</label><input id="end-time" placeholder="1:27:40" required></div></div>
+      <div class="bar"><button type="button" id="use-start" class="ghost" title="プレーヤーの現在時刻を開始欄へ">現在位置を開始に</button><button type="button" id="use-end" class="ghost" title="プレーヤーの現在時刻を終了欄へ">現在位置を終了に</button></div>
+      <div class="twocol"><div class="field"><label for="character">相手キャラ *</label><input id="character" list="characters" placeholder="スティーブ" required><datalist id="characters"></datalist></div><div class="field"><label for="category">対策カテゴリ</label><select id="category"></select></div></div>
+      <div class="field"><label for="clip-title">試合名 *</label><input id="clip-title" placeholder="エイク スマメイト スティーブ戦①" required></div>
+      <div class="field"><label for="clip-note">対策メモ（任意）</label><textarea id="clip-note" rows="2" placeholder="ブロックを置かれた時の対応、崖展開..."> </textarea></div>
+      <div class="bar form-actions"><button class="primary fill" type="submit" id="save-btn">＋ クリップを登録</button><button type="button" id="cancel-edit" class="ghost" hidden>編集をやめる</button></div>
+    </form>
+    <div id="form-status" class="status" role="status" aria-live="polite"></div>
+    <hr class="divider">
+    <h3>② データのバックアップ</h3>
+    <div class="bar"><button type="button" id="export-json">↓ JSONを書き出す</button><label class="filebutton" for="import-json">↑ JSONを読み込む</label><input type="file" accept=".json,application/json" id="import-json" hidden></div>
+    <div class="help">登録内容は端末・ブラウザー・アクセス先URLごとに保存され、PCとiPhoneの自動同期はありません。PCの元ツールでJSONを書き出し、iPhoneでこのサイトを開いてJSONを読み込んでください。読み込みは既存データを置き換えます。</div>
+    <button type="button" id="clear-all" class="ghost danger">全データを削除</button>
+    <div class="note-box">※ YouTubeで埋め込みが許可されていない動画、非公開・削除済み動画は再生できません。配信はYouTube側で再生されるため、ローカル保存や無断再アップロードは行いません。iPhoneでは次の試合の自動再生がブロックされることがあります。その場合は再生ボタンをタップしてください。</div>
+  </aside>
+  <main class="right">
+    <section class="panel">
+      <div class="video-frame"><div id="yt-player"></div><div id="video-placeholder" class="placeholder">YouTubeプレーヤーを準備しています…<br>試合を登録し、「連続再生」を押してください。</div></div>
+      <div id="now-title" class="playing-title">未再生</div><div id="now-desc" class="now-caption">登録した試合の開始〜終了時間だけを連続再生します。</div>
+      <div class="meter"><div id="progress"></div></div><div class="bar" style="justify-content:space-between"><span class="hint" id="time-progress">--:-- / --:--</span><span class="hint" id="queue-progress">0 / 0 試合</span></div>
+      <div class="bar" style="margin-top:12px"><button type="button" id="play-all" class="primary">▶ 条件に合う試合を連続再生</button><button type="button" id="prev">⏮ 前</button><button type="button" id="toggle-play">⏯ 再生 / 一時停止</button><button type="button" id="next">次 ⏭</button><label class="inline-checkbox"><input type="checkbox" id="loop-all">すべてループ</label></div>
+      <div id="player-status" class="status" role="status" aria-live="polite" style="margin-top:10px"></div>
+    </section>
+    <section class="panel scroll-anchor" id="list-section">
+      <div class="list-head"><h2>③ キャラ・状況で絞り込む</h2><span id="clip-count" class="muted">0件</span></div>
+      <div class="filters"><div class="field"><label for="filter-character">キャラ</label><select id="filter-character"><option value="">全キャラ</option></select></div><div class="field"><label for="filter-category">対策カテゴリ</label><select id="filter-category"><option value="">すべて</option></select></div><div class="field search"><label for="filter-search">文字検索</label><input id="filter-search" placeholder="スティーブ、崖、エイク..." type="search"></div></div>
+      <div class="bar" style="margin-bottom:12px"><button type="button" id="clear-filters" class="ghost">絞り込み解除</button><span class="hint">↑↓で再生順を変更できます（現在表示中の試合同士）。</span></div>
+      <div id="clip-list" class="clip-list"></div>
+    </section>
+  </main>
+</div>
+<script>
+(() => {
+  'use strict';
+  const KEY='peach-match-player-v1';
+  const CATEGORIES=['全般','差し合い','立ち回り','崖上がり','崖狩り','着地狩り','復帰阻止','復帰','撃墜','撃墜拒否','反確','コンボ','その他'];
+  const CHARACTERS=['マリオ','ドンキーコング','リンク','サムス','ダークサムス','ヨッシー','カービィ','フォックス','ピカチュウ','ルイージ','ネス','キャプテン・ファルコン','プリン','ピーチ','デイジー','クッパ','アイスクライマー','シーク','ゼルダ','ドクターマリオ','ピチュー','ファルコ','マルス','ルキナ','こどもリンク','ガノンドロフ','ミュウツー','ロイ','クロム','Mr.ゲーム＆ウォッチ','メタナイト','ピット','ブラックピット','ゼロスーツサムス','ワリオ','スネーク','アイク','ポケモントレーナー','ディディーコング','リュカ','ソニック','デデデ','ピクミン＆オリマー','ルカリオ','ロボット','トゥーンリンク','ウルフ','むらびと','ロックマン','Wii Fit トレーナー','ロゼッタ＆チコ','リトル・マック','ゲッコウガ','パルテナ','パックマン','ルフレ','シュルク','クッパJr.','ダックハント','リュウ','ケン','クラウド','カムイ','ベヨネッタ','インクリング','リドリー','シモン','リヒター','キングクルール','しずえ','ガオガエン','パックンフラワー','ジョーカー','勇者','バンジョー＆カズーイ','テリー','ベレト／ベレス','ミェンミェン','スティーブ','セフィロス','ホムラ／ヒカリ','カズヤ','ソラ'];
+  const $=s=>document.querySelector(s);
+  const dom={form:$('#clip-form'),url:$('#video-url'),start:$('#start-time'),end:$('#end-time'),character:$('#character'),category:$('#category'),title:$('#clip-title'),note:$('#clip-note'),formHeading:$('#form-heading'),save:$('#save-btn'),cancel:$('#cancel-edit'),formStatus:$('#form-status'),playerStatus:$('#player-status'),filterCharacter:$('#filter-character'),filterCategory:$('#filter-category'),filterSearch:$('#filter-search'),list:$('#clip-list'),count:$('#clip-count'),placeholder:$('#video-placeholder'),nowTitle:$('#now-title'),nowDesc:$('#now-desc'),progress:$('#progress'),timeProgress:$('#time-progress'),queueProgress:$('#queue-progress'),loop:$('#loop-all')};
+  let clips=readSaved();let editingId=null;let player=null;let playerReady=false;let queue=[];let queueIndex=-1;let currentId=null;let advancing=false;let stoppedAfterEnd=false;
+
+  function uid(){return (typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2)}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+  function parseTime(value){
+    const s=String(value??'').trim().replace(/：/g,':').toLowerCase();
+    if(!s)return NaN;
+    if(/^\d+(?:\.\d+)?$/.test(s))return Number(s);
+    if(/^\d+(?::\d{1,2}){1,2}$/.test(s)){const parts=s.split(':').map(Number);if(parts.slice(1).some(x=>x>=60))return NaN;return parts.reduce((total,n)=>total*60+n,0)}
+    if(/^(?:(?:\d+)h)?(?:(?:\d+)m)?(?:(?:\d+)s)?$/.test(s)&&/\d/.test(s)){const h=Number(s.match(/(\d+)h/)?.[1]||0),m=Number(s.match(/(\d+)m/)?.[1]||0),ss=Number(s.match(/(\d+)s/)?.[1]||0);return h*3600+m*60+ss}
+    return NaN;
+  }
+  function fmt(seconds){if(!Number.isFinite(Number(seconds)))return '--:--';let n=Math.max(0,Math.floor(Number(seconds)));const h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=n%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${m}:${String(s).padStart(2,'0')}`}
+  function videoInfo(input){
+    const raw=String(input||'').trim();if(/^[\w-]{11}$/.test(raw))return {id:raw,time:null};
+    let u;try{u=new URL(raw)}catch{return null}
+    if(!['https:','http:'].includes(u.protocol))return null;
+    const h=u.hostname.toLowerCase().replace(/^www\./,'').replace(/^m\./,'');
+    let id='';
+    if(h==='youtu.be')id=u.pathname.split('/')[1]||'';
+    else if(h==='youtube.com'||h==='youtube-nocookie.com'){
+      if(u.pathname==='/watch')id=u.searchParams.get('v')||'';
+      else if(/^\/(?:live|shorts|embed|v)\//.test(u.pathname))id=u.pathname.split('/')[2]||'';
+    }
+    if(!/^[\w-]{11}$/.test(id))return null;
+    const rawtime=u.searchParams.get('t')||u.searchParams.get('start')||u.hash.match(/t=([^&]+)/)?.[1]||'';
+    const time=parseTime(rawtime);return {id,time:Number.isFinite(time)?time:null};
+  }
+  function validClip(c){return c&&typeof c==='object'&&/^[\w-]{11}$/.test(String(c.videoId||''))&&typeof c.character==='string'&&c.character.trim()&&typeof c.title==='string'&&c.title.trim()&&Number.isFinite(Number(c.start))&&Number.isFinite(Number(c.end))&&Number(c.start)>=0&&Number(c.end)>Number(c.start)&&Number(c.end)-Number(c.start)<=86400*3}
+  function readSaved(){try{const p=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(p)?p.filter(validClip).map(c=>({...c,id:String(c.id||uid()),start:Number(c.start),end:Number(c.end),category:String(c.category||'全般'),note:String(c.note||'')})):[]}catch{return []}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(clips));return true}catch{setStatus(dom.formStatus,'保存に失敗しました。ブラウザーの保存容量・プライベートモードを確認してください。',true);return false}}
+  function setStatus(node,message,error=false){node.textContent=message;node.classList.toggle('err',!!error)}
+  function characters(){return Array.from(new Set([...CHARACTERS,...clips.map(c=>c.character)])).sort((a,b)=>a.localeCompare(b,'ja'))}
+  function setup(){
+    dom.category.innerHTML=CATEGORIES.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+    dom.filterCategory.innerHTML='<option value="">すべて</option>'+CATEGORIES.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+    dom.character.closest('.field').querySelector('datalist').innerHTML=characters().map(c=>`<option value="${esc(c)}"></option>`).join('');
+    dom.note.value='';
+    updateCharacters();render();
+  }
+  function updateCharacters(){
+    const prev=dom.filterCharacter.value;const options=Array.from(new Set(clips.map(c=>c.character))).sort((a,b)=>a.localeCompare(b,'ja'));
+    dom.filterCharacter.innerHTML='<option value="">全キャラ</option>'+options.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    dom.filterCharacter.value=options.includes(prev)?prev:'';
+    $('#characters').innerHTML=characters().map(c=>`<option value="${esc(c)}"></option>`).join('');
+  }
+  function getFiltered(){const ch=dom.filterCharacter.value,cat=dom.filterCategory.value,q=dom.filterSearch.value.trim().toLocaleLowerCase();return clips.filter(c=>(!ch||c.character===ch)&&(!cat||c.category===cat)&&(!q||[c.title,c.character,c.category,c.note].join(' ').toLocaleLowerCase().includes(q)))}
+  function youtubeUrl(c){return `https://www.youtube.com/watch?v=${encodeURIComponent(c.videoId)}&t=${Math.floor(c.start)}s`}
+  function render(){
+    const filtered=getFiltered();dom.count.textContent=`${filtered.length}件 / 全${clips.length}件`;
+    if(!filtered.length){dom.list.innerHTML='<div class="empty">該当する試合はありません。<br>左側からYouTubeのURLと開始・終了時間を登録してください。</div>';return}
+    dom.list.innerHTML=filtered.map((c,i)=>`<article class="clip ${c.id===currentId?'active':''}" data-id="${esc(c.id)}">
+      <div style="min-width:0;flex:1"><div class="clip-title">${i+1}. ${esc(c.title)}</div><div class="clip-sub"><span class="pill">${esc(c.character)}</span>${esc(c.category)} · ${fmt(c.start)}〜${fmt(c.end)} （${fmt(c.end-c.start)}）</div>${c.note?`<div class="clip-note">${esc(c.note)}</div>`:''}</div>
+      <div class="clip-controls"><button data-action="play" data-id="${esc(c.id)}" title="この試合から連続再生">▶ 再生</button><a href="${youtubeUrl(c)}" target="_blank" rel="noopener noreferrer" title="元のYouTube動画をこの開始時刻で開く">YouTube ↗</a><button data-action="edit" data-id="${esc(c.id)}">編集</button><button data-action="up" data-id="${esc(c.id)}" title="再生順をひとつ上へ" ${i===0?'disabled':''}>↑</button><button data-action="down" data-id="${esc(c.id)}" title="再生順をひとつ下へ" ${i===filtered.length-1?'disabled':''}>↓</button><button data-action="delete" data-id="${esc(c.id)}" class="danger" title="削除">×</button></div></article>`).join('');
+  }
+  function clearEdit(){editingId=null;dom.form.reset();dom.note.value='';dom.category.value='全般';dom.save.textContent='＋ クリップを登録';dom.formHeading.textContent='① 試合を登録';dom.cancel.hidden=true;}
+  function editClip(id){const c=clips.find(x=>x.id===id);if(!c)return;editingId=id;dom.url.value=c.sourceUrl||`https://www.youtube.com/watch?v=${c.videoId}`;dom.start.value=fmt(c.start);dom.end.value=fmt(c.end);dom.character.value=c.character;dom.category.value=CATEGORIES.includes(c.category)?c.category:'その他';dom.title.value=c.title;dom.note.value=c.note;dom.save.textContent='変更を保存';dom.formHeading.textContent='① 試合を編集';dom.cancel.hidden=false;$('#form-panel').scrollIntoView({behavior:'smooth',block:'start'});setStatus(dom.formStatus,'編集後「変更を保存」を押してください。');}
+  function move(id,direction){const f=getFiltered();const pos=f.findIndex(c=>c.id===id),neighbor=f[pos+direction];if(!neighbor)return;const a=clips.findIndex(c=>c.id===id),b=clips.findIndex(c=>c.id===neighbor.id);[clips[a],clips[b]]=[clips[b],clips[a]];save();render()}
+  function updateQueueDisplay(){dom.queueProgress.textContent=queueIndex>=0?`${queueIndex+1} / ${queue.length} 試合`:`0 / ${queue.length} 試合`}
+  function startAt(index){
+    if(!playerReady){setStatus(dom.playerStatus,'YouTubeの読み込み待ちです。少し待って再度押してください。',true);return}
+    if(!queue.length)return;
+    if(index<0)index=dom.loop.checked?queue.length-1:0;
+    if(index>=queue.length){if(dom.loop.checked)index=0;else{stoppedAfterEnd=true;setStatus(dom.playerStatus,'再生リストの最後まで再生しました。');player.stopVideo();return}}
+    const id=queue[index],c=clips.find(x=>x.id===id);
+    if(!c){setStatus(dom.playerStatus,'試合が削除されました。絞り込みから再度再生してください。',true);return}
+    queueIndex=index;currentId=id;stoppedAfterEnd=false;dom.placeholder.classList.add('hide');
+    dom.nowTitle.textContent=c.title;dom.nowDesc.textContent=`${c.character} / ${c.category}　${fmt(c.start)}〜${fmt(c.end)}　${c.note||''}`;
+    dom.progress.style.width='0%';dom.timeProgress.textContent=`${fmt(c.start)} / ${fmt(c.end)}`;updateQueueDisplay();render();
+    setStatus(dom.playerStatus,`再生中の試合：${queueIndex+1} / ${queue.length}`);
+    player.loadVideoById({videoId:c.videoId,startSeconds:c.start,endSeconds:c.end});
+  }
+  function begin(id){if(!playerReady){setStatus(dom.playerStatus,'YouTubeプレーヤーがまだ読み込み中です。インターネット接続を確認してください。',true);return}queue=getFiltered().map(c=>c.id);const idx=queue.indexOf(id);if(idx<0)queue=[id];startAt(idx<0?0:idx)}
+  function beginAll(){queue=getFiltered().map(c=>c.id);if(!queue.length){setStatus(dom.playerStatus,'表示中の試合がありません。まず試合を登録してください。',true);return}startAt(0)}
+  function advance(){if(advancing||!playerReady||!currentId||stoppedAfterEnd)return;advancing=true;startAt(queueIndex+1);setTimeout(()=>{advancing=false},750)}
+  function previous(){if(!queue.length)return;startAt(Math.max(0,queueIndex-1))}
+  function next(){if(!queue.length)return;startAt(queueIndex+1)}
+  function currently(){if(!playerReady)return null;try{const x=player.getCurrentTime();return Number.isFinite(x)?x:null}catch{return null}}
+
+  dom.form.addEventListener('submit',ev=>{
+    ev.preventDefault();const info=videoInfo(dom.url.value),start=parseTime(dom.start.value),end=parseTime(dom.end.value),character=dom.character.value.trim(),title=dom.title.value.trim();
+    if(!info){setStatus(dom.formStatus,'正しいYouTubeの動画URLを入力してください。',true);dom.url.focus();return}
+    if(!Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start){setStatus(dom.formStatus,'開始・終了時間を確認してください。例：1:20:30 ～ 1:27:40',true);return}
+    if(end-start>86400*3){setStatus(dom.formStatus,'1つの試合区間は72時間以内にしてください。',true);return}
+    if(!character||!title){setStatus(dom.formStatus,'相手キャラと試合名を入力してください。',true);return}
+    const previous=editingId?clips.find(c=>c.id===editingId):null;
+    const clip={id:previous?.id||uid(),videoId:info.id,sourceUrl:dom.url.value.trim(),start,end,character,title,category:dom.category.value,note:dom.note.value.trim(),createdAt:previous?.createdAt||new Date().toISOString()};
+    if(previous)clips[clips.findIndex(c=>c.id===editingId)]=clip;else clips.push(clip);
+    const wasEditing=!!previous;clearEdit();save();updateCharacters();render();setStatus(dom.formStatus,wasEditing?'変更を保存しました。':'試合を登録しました。下の一覧から再生できます。');
+  });
+  dom.url.addEventListener('change',()=>{const info=videoInfo(dom.url.value);if(info&&info.time!==null&&!dom.start.value.trim())dom.start.value=fmt(info.time)});
+  dom.cancel.addEventListener('click',()=>{clearEdit();setStatus(dom.formStatus,'編集をキャンセルしました。')});
+  $('#use-start').addEventListener('click',()=>{const t=currently();if(t===null){setStatus(dom.formStatus,'先にプレーヤーで試合を再生してください。',true);return}dom.start.value=fmt(t)});
+  $('#use-end').addEventListener('click',()=>{const t=currently();if(t===null){setStatus(dom.formStatus,'先にプレーヤーで試合を再生してください。',true);return}dom.end.value=fmt(t)});
+  for(const sel of [dom.filterCharacter,dom.filterCategory,dom.filterSearch])sel.addEventListener(sel===dom.filterSearch?'input':'change',render);
+  $('#clear-filters').addEventListener('click',()=>{dom.filterCharacter.value='';dom.filterCategory.value='';dom.filterSearch.value='';render()});
+  dom.list.addEventListener('click',ev=>{
+    const b=ev.target.closest('button[data-action]');if(!b)return;const id=b.dataset.id;switch(b.dataset.action){
+      case 'play':begin(id);break;case 'edit':editClip(id);break;case 'up':move(id,-1);break;case 'down':move(id,1);break;
+      case 'delete':{const c=clips.find(c=>c.id===id);if(c&&confirm(`「${c.title}」を削除しますか？`)){clips=clips.filter(c=>c.id!==id);if(editingId===id)clearEdit();if(currentId===id){currentId=null;queue=[];queueIndex=-1;stoppedAfterEnd=true;if(playerReady)player.stopVideo();dom.nowTitle.textContent='未再生';dom.nowDesc.textContent='次の試合を選択してください。';updateQueueDisplay()}save();updateCharacters();render()}break}
+    }
+  });
+  $('#play-all').addEventListener('click',beginAll);$('#next').addEventListener('click',next);$('#prev').addEventListener('click',previous);
+  $('#toggle-play').addEventListener('click',()=>{if(!playerReady){setStatus(dom.playerStatus,'プレーヤーの読み込み中です。',true);return}if(!currentId){beginAll();return}const s=player.getPlayerState();if(s===YT.PlayerState.PLAYING)player.pauseVideo();else{if(stoppedAfterEnd)startAt(queueIndex>=0?queueIndex:0);else player.playVideo()}});
+  $('#export-json').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({app:'peach-match-player',version:1,exportedAt:new Date().toISOString(),clips},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='peach_match_clips_'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
+  $('#import-json').addEventListener('change',async ev=>{const file=ev.target.files?.[0];ev.target.value='';if(!file)return;try{const o=JSON.parse(await file.text()),raw=Array.isArray(o)?o:o.clips;if(!Array.isArray(raw)||raw.length>30000||!raw.every(validClip))throw Error('形式が正しくないか、必要項目がありません。');if(!confirm(`登録済みの${clips.length}件を置き換え、${raw.length}件を読み込みますか？`))return;clips=raw.map(c=>({...c,id:String(c.id||uid()),start:Number(c.start),end:Number(c.end),category:String(c.category||'全般'),note:String(c.note||'')}));clearEdit();save();updateCharacters();render();setStatus(dom.formStatus,`${clips.length}件を読み込みました。`)}catch(e){setStatus(dom.formStatus,'読み込みに失敗しました：'+e.message,true)}});
+  $('#clear-all').addEventListener('click',()=>{if(!clips.length)return;if(!confirm('すべての登録試合を削除します。事前にJSONバックアップを保存しましたか？'))return;clips=[];clearEdit();if(playerReady)player.stopVideo();queue=[];queueIndex=-1;currentId=null;stoppedAfterEnd=true;dom.nowTitle.textContent='未再生';dom.nowDesc.textContent='登録した試合の開始〜終了時間だけを連続再生します。';save();updateCharacters();render();updateQueueDisplay();setStatus(dom.formStatus,'全データを削除しました。')});
+
+  // YouTube公式IFrame Player API。開始・終了時間を指定して再生し、終了時に次の試合へ進む。
+  window.onYouTubeIframeAPIReady=function(){
+    player=new YT.Player('yt-player',{
+      width:'100%',height:'100%',playerVars:{playsinline:1,origin:location.origin,rel:0},
+      events:{
+        onReady:()=>{playerReady=true;dom.placeholder.innerHTML='試合を登録したら、<br>「条件に合う試合を連続再生」を押してください。';setStatus(dom.playerStatus,'YouTubeプレーヤーの準備ができました。')},
+        onStateChange:e=>{
+          if(e.data===YT.PlayerState.ENDED)advance();
+          if(e.data===YT.PlayerState.PLAYING&&currentId)setStatus(dom.playerStatus,`再生中の試合：${queueIndex+1} / ${queue.length}`);
+        },
+        onError:e=>{setStatus(dom.playerStatus,`この動画を埋め込み再生できません（YouTubeエラー ${e.data}）。「次」を押すか、元動画を確認してください。`,true)},
+        onAutoplayBlocked:()=>{setStatus(dom.playerStatus,'ブラウザーが自動再生を制限しました。プレーヤーの再生ボタンを押すか、「再生 / 一時停止」を押してください。',true)}
+      }
+    });
+  };
+  const api=document.createElement('script');api.src='https://www.youtube.com/iframe_api';api.onerror=()=>setStatus(dom.playerStatus,'YouTubeプレーヤーの読み込みに失敗しました。ネット接続や拡張機能を確認してください。',true);document.head.append(api);
+  setInterval(()=>{
+    if(!playerReady||!currentId||stoppedAfterEnd)return;
+    const c=clips.find(c=>c.id===currentId);if(!c)return;
+    const t=currently();if(t===null)return;
+    dom.timeProgress.textContent=`${fmt(t)} / ${fmt(c.end)}`;
+    dom.progress.style.width=`${Math.max(0,Math.min(100,(t-c.start)/(c.end-c.start)*100))}%`;
+    const state=player.getPlayerState();
+    if(t>=c.end-.16&&(state===YT.PlayerState.PLAYING||state===YT.PlayerState.PAUSED))advance();
+  },250);
+  setup();
+})();
+</script>
+</body>
+</html>
